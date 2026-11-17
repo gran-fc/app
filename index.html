@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GRAN FC</title>
+<meta name="theme-color" content="#111111">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="GRAN FC">
+<meta name="robots" content="noindex,nofollow">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap">
+<style>
+:root{--bar:#111;--bar2:#1d1d1d;--bar-text:#c9c9c9;--bg:#fff;--soft:#f6f6f4;--line:#e7e5e0;--ink:#1a1a1a;--sub:#6b6862;--red:#d0121b;--red-soft:#fdeceb;--ok:#1f7a4d;--ok-soft:#e6f3ec;--f:"Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif;color-scheme:light}
+*{box-sizing:border-box}html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:15px;line-height:1.75;-webkit-text-size-adjust:100%}
+button{font:inherit;cursor:pointer}
+.shell{display:grid;grid-template-columns:232px 1fr;min-height:100%}
+.side{background:var(--bar);color:#fff;display:flex;flex-direction:column;padding:20px 12px;position:sticky;top:0;height:100vh}
+.logo{display:flex;align-items:baseline;gap:8px;padding:4px 10px 22px}.logo b{font-weight:900;font-size:20px;letter-spacing:.04em}.logo span{font-size:11px;color:var(--bar-text)}
+.nav{display:grid;gap:4px}
+.nav button{display:flex;align-items:center;gap:12px;background:none;border:0;color:var(--bar-text);padding:10px 12px;border-radius:8px;text-align:left;font-size:14.5px;position:relative}
+.nav button svg{width:20px;height:20px;flex:none}
+.nav button.on{background:var(--bar2);color:#fff;font-weight:700}
+.nav button.on::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:2px;background:var(--red)}
+.nav .dot{position:absolute;right:12px;top:50%;transform:translateY(-50%);min-width:18px;height:18px;border-radius:9px;background:var(--red);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 5px;font-style:normal}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px 10px;border-top:1px solid #2a2a2a;font-size:13px}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--red);display:grid;place-items:center;font-weight:700;flex:none}
+.main{min-width:0;padding:28px 32px 120px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.top h1{margin:0;font-size:24px;font-weight:900;text-wrap:balance}
+.date{font-size:12px;color:var(--sub);letter-spacing:.06em}
+.grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:18px}
+.col{display:grid;gap:18px;align-content:start;min-width:0}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;min-width:0}
+.card h2{margin:0 0 12px;font-size:16px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.card h2 small{font-weight:400;font-size:12px;color:var(--sub)}
+.hero{background:var(--bar);color:#fff;border:0;position:relative;overflow:hidden}
+.hero .eyebrow{font-size:11px;letter-spacing:.14em;color:#ff8a8f;font-weight:700}
+.hero h2{color:#fff;font-size:20px;margin:6px 0 12px;display:block;line-height:1.5;position:relative}
+.hero .stripe{position:absolute;right:-30px;top:-30px;width:180px;height:180px;border-radius:50%;border:22px solid rgba(208,18,27,.35)}
+.task{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid rgba(255,255,255,.12);position:relative}
+.task:first-of-type{border-top:0}
+.check{flex:none;width:22px;height:22px;border-radius:6px;border:2px solid #777;background:none;display:grid;place-items:center;margin-top:2px;padding:0}
+.check.done{background:var(--red);border-color:var(--red)}
+.check.done::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.task p{margin:0}.task .meta{font-size:12px;color:#aaa}
+.task.done p:first-child{text-decoration:line-through;color:#888}
+.btn{display:inline-flex;align-items:center;gap:6px;background:var(--red);color:#fff;border:0;border-radius:8px;padding:10px 18px;font-weight:700;text-decoration:none;font-size:14px}
+.btn.ghost{background:#fff;color:var(--red);border:1px solid var(--red)}
+.btn.dark{background:var(--bar);color:#fff}
+.btn.small{padding:4px 12px;font-size:12.5px}
+.btn:disabled{opacity:.55;cursor:default}
+.btns{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.count{display:flex;align-items:baseline;gap:6px}.count b{font-size:38px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}.count span{color:var(--sub);font-size:13px}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px}
+.week div{text-align:center;font-size:11px;color:var(--sub)}
+.week i{display:block;height:28px;border-radius:6px;background:var(--soft);margin-bottom:4px}
+.week i.on{background:var(--red)}.week i.today{outline:2px solid var(--ink);outline-offset:1px}
+.event{display:flex;gap:14px;align-items:center}
+.cal{flex:none;width:58px;border-radius:10px;overflow:hidden;border:1px solid var(--line);text-align:center}
+.cal b{display:block;background:var(--red);color:#fff;font-size:11px;padding:2px 0}.cal span{display:block;font-size:22px;font-weight:900;padding:4px 0}
+.muted{color:var(--sub);font-size:13px}
+.pill{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 9px;border-radius:999px;background:var(--red-soft);color:var(--red);white-space:nowrap}
+.pill.gray{background:var(--soft);color:var(--sub)}.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.list .row{padding:12px 0;border-top:1px solid var(--line)}.list .row:first-child{border-top:0}
+.row h3{margin:2px 0 4px;font-size:15px}.row p{margin:0;white-space:pre-wrap}
+.terms{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.term{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;text-align:left;display:grid;gap:6px}
+.term:hover{border-color:var(--ink)}.term b{font-size:15px}.term small{color:var(--sub);font-size:12.5px;line-height:1.6}
+.sec{font-size:12px;font-weight:700;color:var(--red);letter-spacing:.06em;margin:16px 0 0}
+.field{padding:12px 0;border-top:1px solid var(--line)}
+.field .label{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.field .label b{font-size:14.5px}
+.field .value{margin:6px 0 0;white-space:pre-wrap}.field .value.empty{color:#a8a49d}
+textarea,input[type=text],input[type=url]{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+textarea{min-height:80px}
+textarea:focus,input:focus,button:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+.back{background:none;border:0;color:var(--sub);padding:0;margin-bottom:10px}
+.tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.tabs button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 14px;font-size:13px}
+.tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chat{display:grid;gap:12px;margin-bottom:14px}
+.msg{max-width:88%;padding:12px 14px;border-radius:12px;white-space:pre-wrap}
+.msg.me{justify-self:end;background:var(--ink);color:#fff;border-bottom-right-radius:4px}
+.msg.bot{background:var(--soft);border-bottom-left-radius:4px}
+.ask{display:flex;gap:8px;align-items:flex-end}.ask textarea{min-height:52px}
+.toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9;max-width:90vw;text-align:center}
+.toast.on{opacity:1}
+.note{font-size:12.5px;color:var(--sub);background:var(--soft);border-radius:8px;padding:10px 12px}
+.loading{display:flex;align-items:center;gap:10px;color:var(--sub);font-size:13px;margin-bottom:12px}
+.spin{width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--red);border-radius:50%;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.skel{background:var(--soft);border-radius:12px;height:140px}
+.center{max-width:460px;margin:12vh auto;padding:0 20px;text-align:center}
+.foot{margin-top:28px;font-size:12px;color:var(--sub)}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+@media (max-width:760px){
+  .shell{grid-template-columns:1fr}
+  .side{position:fixed;top:auto;bottom:0;left:0;right:0;height:auto;flex-direction:row;padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));z-index:4}
+  .logo,.me{display:none}
+  .nav{grid-template-columns:repeat(6,1fr);width:100%;gap:2px}
+  .nav button{flex-direction:column;gap:2px;font-size:10.5px;padding:6px 2px;justify-content:center}
+  .nav button.on::before{left:30%;right:30%;top:0;bottom:auto;width:auto;height:3px}
+  .nav .dot{top:2px;right:18%;transform:none;min-width:16px;height:16px;font-size:10px}
+  .main{padding:calc(18px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 110px max(16px,env(safe-area-inset-left,0px))}
+  .top h1{font-size:20px}
+}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}.spin{animation:none}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+'use strict';
+const API = 'https://script.google.com/macros/s/AKfycby--gAOBqJOgtSZqO_PrnC0CTagvGjgqn8TxKG9pHLDIKZ1YrbxEEOB-yQFd4A2Db7V/exec';
+const LS = { get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}, del(k){try{localStorage.removeItem(k)}catch(e){}} };
+const $ = s => document.querySelector(s);
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),2400)}
+
+/* 合言葉：はじめて届いたアドレス（#t=…）から開いたときに端末に覚え、アドレスからは消す */
+(function(){const m=location.hash.match(/t=([0-9a-f]{20,64})/i);if(m){LS.set('gran_t',m[1]);history.replaceState(null,'',location.pathname)}})();
+const TOKEN = LS.get('gran_t');
+
+async function apiGet(params){const q=new URLSearchParams(Object.assign({token:TOKEN},params));const r=await fetch(API+'?'+q.toString());return r.json()}
+async function apiPost(body){const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({token:TOKEN},body))});return r.json()}
+
+const IC={home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',build:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',tana:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 4h6M9 4a2 2 0 0 0-2 2H5v15h14V6h-2a2 2 0 0 0-2-2M9 12h6M9 16h4"/></svg>',rec:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16M4 12h16M4 19h10"/></svg>',ask:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>',file:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5"/></svg>'};
+const NAV=[['home','ホーム'],['build','本部づくり'],['tana','棚卸し'],['rec','記録'],['ask','質問する'],['file','資料と講義']];
+
+const S={view:'home',term:null,editing:null,recTab:'決めたこと',d:null,loading:false,chat:[],busy:false};
+try{S.chat=JSON.parse(sessionStorage.getItem('gran_chat')||'[]')}catch(e){}
+const saveChat=()=>{try{sessionStorage.setItem('gran_chat',JSON.stringify(S.chat.slice(-30)))}catch(e){}};
+
+async function load(){
+  const cached=LS.get('gran_me');
+  if(cached&&!S.d){try{S.d=JSON.parse(cached)}catch(e){}}
+  S.loading=true;render();
+  try{
+    const r=await apiGet({api:'me'});
+    if(!r.ok){if(r.code==='token'){LS.del('gran_t');LS.del('gran_me');S.d={ok:false,msg:r.msg}}else toast(r.msg||'読み込めませんでした');}
+    else{S.d=r;LS.set('gran_me',JSON.stringify(r))}
+  }catch(e){toast('通信できませんでした。電波のよい所でもう一度開いてください。')}
+  S.loading=false;render();
+}
+
+function go(v){S.view=v;S.term=null;S.editing=null;render();window.scrollTo(0,0)}
+function shell(inner){
+  const d=S.d||{};const open=(d.tasks||[]).filter(x=>!x.done).length;
+  return `<div class="shell"><aside class="side"><div class="logo"><b>GRAN FC</b><span>本部構築講座</span></div>
+  <nav class="nav">${NAV.map(([k,l])=>`<button class="${S.view===k?'on':''}" data-v="${k}" aria-label="${l}">${IC[k]}<span>${l}</span>${k==='home'&&open?`<i class="dot">${open}</i>`:''}</button>`).join('')}</nav>
+  <div class="me"><div class="avatar">${esc((d.name||'G').replace(/^(株式会社|有限会社|合同会社)\s*/,'').charAt(0))}</div><div>${esc(d.name||'')}</div></div></aside>
+  <main class="main">${S.loading?`<div class="loading"><span class="spin"></span>最新の内容を読み込んでいます…</div>`:''}${inner}
+  <p class="foot">${esc(d.contact||'うまく動かないときは、GRAN 事務局にお問い合わせください。')}</p></main></div>`;
+}
+
+function today(){const n=new Date();return ['SUN','MON','TUE','WED','THU','FRI','SAT'][n.getDay()]+' · '+['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][n.getMonth()]+' '+n.getDate()}
+function fmtEvent(e){const t=new Date(e.at);const days=Math.ceil((new Date(t.toDateString())-new Date(new Date().toDateString()))/86400000);return {m:(t.getMonth()+1)+'月',d:t.getDate(),line:`${t.getMonth()+1}/${t.getDate()}（${'日月火水木金土'[t.getDay()]}）${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}${e.end?'〜'+e.end:''}${days>0?'・あと'+days+'日':days===0?'・今日':''}`}}
+function gcal(e){const t=new Date(e.at);const p=n=>String(n).padStart(2,'0');const f=x=>x.getUTCFullYear()+p(x.getUTCMonth()+1)+p(x.getUTCDate())+'T'+p(x.getUTCHours())+p(x.getUTCMinutes())+'00Z';let end=new Date(t.getTime()+90*60000);if(e.end){const [h,m]=e.end.split(':');end=new Date(t);end.setHours(+h,+m)}return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(e.title)+'&dates='+f(t)+'/'+f(end)}
+function standalone(){return window.matchMedia('(display-mode: standalone)').matches||navigator.standalone}
+
+function home(){
+  const d=S.d,open=d.tasks.filter(x=>!x.done).length,lec=d.lectures[0],ev=d.events||[];
+  return `<div class="top"><div><div class="date">${today()}</div><h1>こんにちは、${esc(d.name)}</h1></div></div>
+  <div class="grid"><div class="col">
+    <div class="card hero"><div class="stripe"></div><div class="eyebrow">TODAY · 今日やること</div>
+      <h2>${d.tasks.length?(open?`コンサルで決めたことが、あと${open}つあります`:'決めたことは、全部済みです'):'いま、決めたことの宿題はありません'}</h2>
+      ${d.tasks.map(x=>`<div class="task ${x.done?'done':''}"><button class="check ${x.done?'done':''}" data-task="${x.id}" aria-label="${esc(x.t)}を${x.done?'未完了に戻す':'済みにする'}"></button><div><p>${esc(x.t)}</p><p class="meta">${x.due?'期限 '+esc(x.due)+'　':''}${esc(x.kai)}のコンサルで決めたこと</p></div></div>`).join('')}
+    </div>
+    ${lec?`<div class="card"><h2>最新の講義 <small>動画と資料</small></h2><div class="list"><div class="row"><p class="muted">${esc(lec.date)}</p><h3>${esc(lec.title)}</h3><a class="btn ghost" href="${esc(lec.url)}" target="_blank" rel="noopener">講義を見る</a></div></div></div>`:''}
+    <div class="card"><h2>わからないことは、すぐ聞けます</h2><p class="muted" style="margin:0 0 12px">講座の資料と、御社のコンサルの記録から答えます。</p><button class="btn dark" data-go="ask">質問する</button></div>
+  </div><div class="col">
+    <div class="card"><h2>続けた日 <small>アプリを開いた日</small></h2><div class="count"><b>${d.visit.streak}</b><span>日 続いています</span></div>
+      <div class="week">${d.visit.week.map(w=>`<div><i class="${w.on?'on':''} ${w.today?'today':''}"></i>${w.d}</div>`).join('')}</div></div>
+    ${ev.length?`<div class="card"><h2>次の予定</h2>${ev.map(e=>{const f=fmtEvent(e);return `<div class="event" style="margin-bottom:10px"><div class="cal"><b>${f.m}</b><span>${f.d}</span></div><div><b>${esc(e.title)}</b><p class="muted" style="margin:0">${f.line}</p></div></div>`}).join('')}
+      <div class="btns" style="margin-top:6px"><a class="btn ghost" href="${gcal(ev[0])}" target="_blank" rel="noopener">カレンダーに追加</a><button class="btn ghost" data-go="rec" data-rec="壁打ちの質問">質問を送っておく</button></div></div>`:''}
+    ${d.notices.length?`<div class="card"><h2>お知らせ</h2><div class="list">${d.notices.map(n=>`<div class="row"><p class="muted">${esc(n.at)}</p><p>${esc(n.t)}</p></div>`).join('')}</div></div>`:''}
+    ${standalone()?'':`<div class="card"><h2>ホーム画面に置く</h2><p class="muted" style="margin:0">iPhone は、下の共有ボタンから「ホーム画面に追加」を押します。Android は、右上のメニューから「ホーム画面に追加」を押します。次からはアイコンを押すだけで開けます。</p></div>`}
+  </div></div>`;
+}
+
+function build(){
+  const d=S.d;
+  if(S.term!==null) return termView(d.terms[S.term]);
+  return `<div class="top"><div><h1>本部づくり</h1><p class="muted" style="margin:4px 0 0">10のテーマごとに、今の答えを見て、その場で書き足せます。書いた答えは構築シートに入ります。</p></div></div>
+  <div class="terms">${d.terms.map((t,i)=>`<button class="term" data-t="${i}"><b>${esc(t.name)}</b><small>${esc(t.desc)}</small></button>`).join('')}</div>`;
+}
+function termView(t){
+  let sec='',h='';
+  t.fields.forEach((f,i)=>{
+    if(f.sec!==sec){sec=f.sec;if(sec)h+=`<p class="sec">${esc(sec)}</p>`}
+    h+=S.editing===i?`<div class="field"><div class="label"><b>${esc(f.item)}</b></div><textarea id="ed">${esc(f.value)}</textarea>
+      <div class="btns" style="margin-top:8px"><button class="btn" data-save="${i}">保存する</button><button class="btn ghost" data-cancel>やめる</button></div></div>`
+    :`<div class="field"><div class="label"><b>${esc(f.item)}</b><button class="btn ghost small" data-edit="${i}">${f.value?'書き直す':'書く'}</button></div><p class="value ${f.value?'':'empty'}">${f.value?esc(f.value):'まだ書いていません'}</p></div>`;
+  });
+  return `<button class="back" data-go="build">← 本部づくりへ</button><div class="top"><div><h1>${esc(t.name)}</h1><p class="muted" style="margin:4px 0 0">${esc(t.desc)}</p></div></div><div class="card">${h||'<p class="muted">項目がまだありません。</p>'}</div>`;
+}
+
+function tana(){
+  const t=S.d.tana;let sec='',h='';
+  t.items.forEach(it=>{if(it.sec!==sec){if(sec)h+='</div>';sec=it.sec;h+=`<div class="card"><h2>${esc(sec)}</h2>`}
+    h+=`<div class="field"><div class="label"><b>${esc(it.name)}</b>${it.value?'<span class="pill ok">入っています</span>':'<span class="pill">まだです</span>'}</div><p class="muted" style="margin:2px 0 6px">${esc(it.q)}</p><textarea class="tana" data-name="${esc(it.name)}" maxlength="2000">${esc(it.value)}</textarea></div>`});
+  h+='</div>';
+  return `<div class="top"><div><h1>棚卸し</h1><p class="muted" style="margin:4px 0 0">今の会社の状態を書き出して、1枚の下書きにします。すでに答えている項目は入れてあります。加盟金などのこれから決めることは、コンサルで一緒に決めます。</p></div></div>
+  <div class="grid"><div class="col">${h}<div class="btns"><button class="btn ghost" id="tsave">保存する</button>${t.ready?'<button class="btn" id="tmake">下書きを作る</button>':''}</div></div>
+  <div class="col"><div class="card" id="draft">${draftHtml(t.draft)}</div></div></div>`;
+}
+function draftHtml(dr){return dr?`<h2>下書き <small>${esc(dr.at)} に作成</small></h2><div class="msg bot" style="max-width:100%" id="dtext">${esc(dr.text)}</div><div class="btns" style="margin-top:10px"><button class="btn ghost small" id="dcopy">下書きをコピー</button></div>`:'<h2>下書き</h2><p class="muted">「下書きを作る」を押すと、ここに出ます。30秒ほどかかります。</p>'}
+const tanaVals=()=>{const o={};document.querySelectorAll('textarea.tana').forEach(x=>o[x.dataset.name]=x.value);return o};
+
+const REC_KIND={'決めたこと':/決定|要確認/,'やること':/アクション/,'教わったこと':/ノウハウ|マーケ|Q&A/};
+function rec(){
+  const d=S.d,k=S.recTab;
+  const tabs=['決めたこと','やること','教わったこと','壁打ちの質問'];
+  let body='';
+  if(k==='壁打ちの質問'){
+    body=`<div class="card" style="margin-bottom:14px"><h2>次の壁打ちで聞きたいこと</h2>
+      <input type="text" id="kw" placeholder="解決したいこと" maxlength="300"><textarea id="kq" style="margin-top:8px" placeholder="質問の内容" maxlength="2000"></textarea><textarea id="ks" style="margin-top:8px" placeholder="いまの状況（あれば）" maxlength="2000"></textarea>
+      <div class="btns" style="margin-top:8px"><button class="btn" id="ksend">送る</button></div></div>
+      <div class="card list">${d.kabe.length?d.kabe.map(x=>`<div class="row"><p class="muted">${esc(x.at)}</p><h3>${esc(x.want||x.q)}</h3>${x.want&&x.q?`<p>${esc(x.q)}</p>`:''}
+      ${x.ans?`<p style="margin-top:6px"><span class="pill gray">壁打ちでの回答</span> ${esc(x.ans)}</p>`:''}
+      <div class="btns" style="margin-top:8px"><button class="btn ghost small" data-kans="${x.row}" data-stamp="${esc(x.at)}">${x.ans?'回答を書き直す':'回答を書き足す'}</button></div></div>`).join(''):'<p class="muted">まだありません。</p>'}</div>`;
+  }else{
+    const rows=d.consult.rows.filter(r=>REC_KIND[k].test(r.kind));
+    body=`<div class="card list">${rows.length?rows.map(r=>`<div class="row"><p class="muted">${esc(r.kai)}${r.due?'　期限 '+esc(r.due):''}${r.state?'　'+esc(r.state):''}</p><h3><span class="pill gray">${esc(r.kind.replace(/^[^\s]+\s/,''))}</span> ${esc(r.head)}</h3><p>${esc(r.body)}</p></div>`).join(''):'<p class="muted">まだありません。</p>'}</div>`;
+  }
+  return `<div class="top"><div><h1>記録</h1><p class="muted" style="margin:4px 0 0">${esc(d.consult.sessions||'コンサルで決めたこと・教わったことと、壁打ちの質問をまとめています。')}</p></div></div>
+  <div class="tabs">${tabs.map(x=>`<button class="${x===k?'on':''}" data-rt="${x}">${x}</button>`).join('')}</div>${body}`;
+}
+
+function ask(){
+  const b=S.d.bot;
+  const intro={me:false,t:'講座の資料と、御社のコンサルの記録を元にお答えします。契約・法律・収益の見通しの判断は、コンサルか GRAN 事務局で確かめてください。'};
+  return `<div class="top"><div><h1>質問する</h1><p class="muted" style="margin:4px 0 0">${b.ready?`今日あと ${b.left} 回`:'準備中です'}</p></div></div>
+  <div class="card"><div class="chat" id="chat">${[intro].concat(S.chat).map(m=>`<div class="msg ${m.me?'me':'bot'}">${esc(m.t)}</div>`).join('')}${S.busy?'<div class="msg bot"><span class="spin" style="display:inline-block;vertical-align:middle"></span> 答えを作っています…</div>':''}</div>
+  ${b.ready?`<div class="ask"><textarea id="q" placeholder="聞きたいことを書いてください" maxlength="1000"></textarea><button class="btn" id="send" ${S.busy?'disabled':''}>送る</button></div>`:'<p class="muted">いまは GRAN 事務局にお問い合わせください。</p>'}</div>`;
+}
+
+function file(){
+  const d=S.d;
+  return `<div class="top"><div><h1>資料と講義</h1></div></div>
+  <div class="grid"><div class="col"><div class="card"><h2>講義</h2><div class="list">${d.lectures.length?d.lectures.map(l=>`<div class="row"><p class="muted">${esc(l.date)}</p><h3>${esc(l.title)}</h3><a href="${esc(l.url)}" target="_blank" rel="noopener" style="color:var(--red)">動画と資料を見る</a></div>`).join(''):'<p class="muted">まだありません。</p>'}</div></div></div>
+  <div class="col"><div class="card"><h2>資料を送る</h2><p class="muted" style="margin:0 0 10px">マニュアル・パンフレット・LPなど。ファイル（10MBまで）でも、URLでも送れます。</p>
+    <input type="file" id="f" aria-label="送るファイル"><div class="btns" style="margin-top:8px"><button class="btn" id="fsend">ファイルを送る</button></div>
+    <input type="url" id="lu" style="margin-top:14px" placeholder="https://…"><input type="text" id="lt" style="margin-top:8px" placeholder="名前（なくても大丈夫です）" maxlength="120">
+    <div class="btns" style="margin-top:8px"><button class="btn ghost" id="lsend">URLを送る</button></div></div>
+    <div class="card"><h2>送った資料</h2><div class="list">${d.attach.length?d.attach.map(f=>`<div class="row"><p class="muted">${esc(f.at)}　${esc(f.term)}</p>${f.url?`<a href="${esc(f.url)}" target="_blank" rel="noopener" style="color:var(--red)">${esc(f.label)}</a>`:esc(f.label)}</div>`).join(''):'<p class="muted">まだありません。</p>'}</div></div>
+  </div></div>`;
+}
+
+function render(){
+  const root=$('#root');
+  if(!TOKEN){root.innerHTML=`<div class="center"><h1 style="font-size:22px">GRAN FC</h1><p>このアプリは、GRAN から届いたアドレスから開いてください。</p><p class="muted">うまく開けないときは、GRAN 事務局にお問い合わせください。</p></div>`;return}
+  if(!S.d){root.innerHTML=shell(`<div class="grid"><div class="col"><div class="skel"></div><div class="skel"></div></div><div class="col"><div class="skel"></div></div></div>`);bindNav();return}
+  if(S.d.ok===false){root.innerHTML=`<div class="center"><h1 style="font-size:22px">GRAN FC</h1><p>${esc(S.d.msg)}</p></div>`;return}
+  const V={home,build,tana,rec,ask,file};
+  root.innerHTML=shell(V[S.view]());
+  bindNav();bind();
+}
+function bindNav(){document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>go(b.dataset.v))}
+
+async function busy(btn,label,fn){const old=btn.textContent;btn.disabled=true;btn.textContent=label;try{await fn()}catch(e){toast('通信できませんでした。もう一度お試しください。')}finally{btn.disabled=false;btn.textContent=old}}
+
+function bind(){
+  const m=$('#root');
+  m.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{if(b.dataset.rec)S.recTab=b.dataset.rec;go(b.dataset.go)});
+  m.querySelectorAll('[data-task]').forEach(b=>b.onclick=async()=>{const x=S.d.tasks.find(t=>t.id===b.dataset.task);x.done=!x.done;render();if(x.done)toast('済みにしました');apiPost({api:'taskDone',id:x.id,done:x.done}).catch(()=>{});LS.set('gran_me',JSON.stringify(S.d))});
+  m.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{S.term=+b.dataset.t;S.editing=null;render();window.scrollTo(0,0)});
+  m.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{S.editing=+b.dataset.edit;render();const e=$('#ed');e&&e.focus()});
+  m.querySelectorAll('[data-cancel]').forEach(b=>b.onclick=()=>{S.editing=null;render()});
+  m.querySelectorAll('[data-save]').forEach(b=>b.onclick=()=>busy(b,'保存しています…',async()=>{
+    const t=S.d.terms[S.term],f=t.fields[+b.dataset.save],v=$('#ed').value.trim();
+    const r=await apiPost({api:'saveTerm',term:t.name,sec:f.sec,item:f.item,value:v});
+    if(r.ok){f.value=v;S.editing=null;LS.set('gran_me',JSON.stringify(S.d));render();toast('保存しました。構築シートにも入りました')}else toast(r.msg||'保存できませんでした')}));
+  m.querySelectorAll('[data-rt]').forEach(b=>b.onclick=()=>{S.recTab=b.dataset.rt;render()});
+  const ks=$('#ksend');if(ks)ks.onclick=()=>busy(ks,'送っています…',async()=>{
+    const w=$('#kw').value.trim(),q=$('#kq').value.trim(),s=$('#ks').value.trim();if(!w&&!q){toast('「解決したいこと」か「質問の内容」を書いてください');return}
+    const r=await apiPost({api:'kabe',want:w,question:q,situation:s});if(r.ok){toast('送りました');load()}else toast(r.msg||'送れませんでした')});
+  m.querySelectorAll('[data-kans]').forEach(b=>b.onclick=()=>{const row=b.closest('.row');if(row.querySelector('textarea'))return;
+    const x=S.d.kabe.find(k=>String(k.row)===b.dataset.kans);row.insertAdjacentHTML('beforeend',`<textarea style="margin-top:8px" maxlength="2000">${esc(x.ans)}</textarea><div class="btns" style="margin-top:6px"><button class="btn small">回答を保存する</button></div>`);
+    const btn=row.querySelector('.btns:last-child .btn');btn.onclick=()=>busy(btn,'保存しています…',async()=>{const a=row.querySelector('textarea').value.trim();if(!a)return;
+      const r=await apiPost({api:'kabeAnswer',row:x.row,stamp:x.at,answer:a});if(r.ok){x.ans=a;render();toast('保存しました')}else toast(r.msg||'保存できませんでした')})});
+  const ts=$('#tsave');if(ts)ts.onclick=()=>busy(ts,'保存しています…',async()=>{const r=await apiPost({api:'tanaSave',answers:tanaVals()});toast(r.ok?'保存しました':(r.msg||'保存できませんでした'))});
+  const tm=$('#tmake');if(tm)tm.onclick=()=>busy(tm,'下書きを作っています…',async()=>{const r=await apiPost({api:'tanaDraft',answers:tanaVals()});if(r.ok){S.d.tana.draft=r.draft;$('#draft').innerHTML=draftHtml(r.draft);bindDraft();toast('下書きができました')}else toast(r.msg||'作れませんでした')});
+  bindDraft();
+  const sd=$('#send');if(sd)sd.onclick=async()=>{const q=$('#q').value.trim();if(!q||S.busy)return;S.chat.push({me:true,t:q});S.busy=true;saveChat();render();
+    try{const r=await apiPost({api:'ask',q});S.chat.push({me:false,t:r.ok?r.answer:(r.msg||'答えを作れませんでした')});if(r.ok)S.d.bot.left=r.left}catch(e){S.chat.push({me:false,t:'通信できませんでした。もう一度お試しください。'})}
+    S.busy=false;saveChat();render();const c=$('#chat');c&&c.lastElementChild.scrollIntoView({block:'nearest'})};
+  const fs=$('#fsend');if(fs)fs.onclick=()=>busy(fs,'送っています…',async()=>{const f=$('#f').files[0];if(!f){toast('ファイルを選んでください');return}
+    if(f.size>10*1024*1024){toast('10MBまでです。大きいファイルは GRAN 事務局へ直接お送りください');return}
+    const b64=await new Promise((ok,ng)=>{const rd=new FileReader();rd.onload=()=>ok(String(rd.result).split(',')[1]);rd.onerror=ng;rd.readAsDataURL(f)});
+    const r=await apiPost({api:'upload',fileName:f.name,mimeType:f.type||'application/octet-stream',base64:b64});if(r.ok){toast('送りました');load()}else toast(r.msg||'送れませんでした')});
+  const ls=$('#lsend');if(ls)ls.onclick=()=>busy(ls,'送っています…',async()=>{const u=$('#lu').value.trim();if(!/^https?:\/\//.test(u)){toast('https:// から始まるURLを入れてください');return}
+    const r=await apiPost({api:'link',url:u,title:$('#lt').value.trim()});if(r.ok){toast('送りました');load()}else toast(r.msg||'送れませんでした')});
+}
+function bindDraft(){const c=$('#dcopy');if(c)c.onclick=()=>{const t=$('#dtext').innerText;navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>toast('コピーしました'),()=>toast('コピーできませんでした'))}}
+
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+render();if(TOKEN)load();
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&TOKEN&&S.d&&!S.loading)load()});
+</script>
+</body>
+</html>
