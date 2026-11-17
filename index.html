@@ -72,6 +72,8 @@ button{font:inherit;cursor:pointer}
 .terms{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
 .term{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;text-align:left;display:grid;gap:6px}
 .term:hover{border-color:var(--ink)}.term b{font-size:15px}.term small{color:var(--sub);font-size:12.5px;line-height:1.6}
+.savebar{position:sticky;bottom:calc(12px + env(safe-area-inset-bottom,0px));margin-top:14px;background:var(--bar);color:#fff;border-radius:12px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13.5px;z-index:3}
+.field textarea.tf{min-height:44px;resize:vertical;margin-top:6px;overflow:hidden}
 .sec{font-size:12px;font-weight:700;color:var(--red);letter-spacing:.06em;margin:16px 0 0}
 .field{padding:12px 0;border-top:1px solid var(--line)}
 .field .label{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
@@ -100,6 +102,7 @@ textarea:focus,input:focus,button:focus-visible{outline:2px solid var(--ink);out
 .foot{margin-top:28px;font-size:12px;color:var(--sub)}
 @media (max-width:860px){.grid{grid-template-columns:1fr}}
 @media (max-width:760px){
+  .savebar{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
   .shell{grid-template-columns:1fr}
   .side{position:fixed;top:auto;bottom:0;left:0;right:0;height:auto;flex-direction:row;padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));z-index:4}
   .logo,.me{display:none}
@@ -145,12 +148,12 @@ async function load(){
   try{
     const r=await apiGet({api:'me'});
     if(!r.ok){if(r.code==='token'){LS.del('gran_t');LS.del('gran_me');S.d={ok:false,msg:r.msg}}else toast(r.msg||'読み込めませんでした');}
-    else{S.d=r;LS.set('gran_me',JSON.stringify(r))}
+    else{if(dirtyCount()){LS.set('gran_me',JSON.stringify(r));S.loading=false;return}S.d=r;LS.set('gran_me',JSON.stringify(r))}
   }catch(e){toast('通信できませんでした。電波のよい所でもう一度開いてください。')}
   S.loading=false;render();
 }
 
-function go(v){S.view=v;S.term=null;S.editing=null;render();window.scrollTo(0,0)}
+function go(v){if(!leaveOk())return;S.view=v;S.term=null;S.editing=null;render();window.scrollTo(0,0)}
 function shell(inner){
   const d=S.d||{};const open=(d.tasks||[]).filter(x=>!x.done).length;
   return `<div class="shell"><aside class="side"><div class="logo"><b>GRAN FC</b><span>本部構築講座</span></div>
@@ -195,12 +198,16 @@ function termView(t){
   let sec='',h='';
   t.fields.forEach((f,i)=>{
     if(f.sec!==sec){sec=f.sec;if(sec)h+=`<p class="sec">${esc(sec)}</p>`}
-    h+=S.editing===i?`<div class="field"><div class="label"><b>${esc(f.item)}</b></div><textarea id="ed">${esc(f.value)}</textarea>
-      <div class="btns" style="margin-top:8px"><button class="btn" data-save="${i}">保存する</button><button class="btn ghost" data-cancel>やめる</button></div></div>`
-    :`<div class="field"><div class="label"><b>${esc(f.item)}</b><button class="btn ghost small" data-edit="${i}">${f.value?'書き直す':'書く'}</button></div><p class="value ${f.value?'':'empty'}">${f.value?esc(f.value):'まだ書いていません'}</p></div>`;
+    h+=`<div class="field"><label class="label" for="tf${i}"><b>${esc(f.item)}</b></label><textarea class="tf" id="tf${i}" data-i="${i}" rows="1" placeholder="ここに書きます">${esc(f.value)}</textarea></div>`;
   });
-  return `<button class="back" data-go="build">← 本部づくりへ</button><div class="top"><div><h1>${esc(t.name)}</h1><p class="muted" style="margin:4px 0 0">${esc(t.desc)}</p></div></div><div class="card">${h||'<p class="muted">項目がまだありません。</p>'}</div>`;
+  return `<button class="back" data-go="build">← 本部づくりへ</button><div class="top"><div><h1>${esc(t.name)}</h1><p class="muted" style="margin:4px 0 0">${esc(t.desc)}</p></div></div>
+  <div class="card">${h||'<p class="muted">項目がまだありません。</p>'}</div>
+  <div class="savebar" id="savebar" hidden><span id="dirtyn"></span><button class="btn" id="tsaveall">まとめて保存する</button></div>`;
 }
+function grow(el){el.style.height='auto';el.style.height=(el.scrollHeight+2)+'px'}
+function dirtyCount(){if(S.term===null)return 0;const t=S.d.terms[S.term];let n=0;document.querySelectorAll('textarea.tf').forEach(x=>{if(x.value.trim()!==(t.fields[+x.dataset.i].value||'').trim())n++});return n}
+function updateBar(){const n=dirtyCount(),b=$('#savebar');if(!b)return;b.hidden=!n;$('#dirtyn').textContent=n+'項目を書き換えました（まだ保存していません）'}
+function leaveOk(){return !dirtyCount()||confirm('保存していない書き換えがあります。保存せずに移りますか？')}
 
 function tana(){
   const t=S.d.tana;let sec='',h='';
@@ -272,12 +279,13 @@ function bind(){
   m.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{if(b.dataset.rec)S.recTab=b.dataset.rec;go(b.dataset.go)});
   m.querySelectorAll('[data-task]').forEach(b=>b.onclick=async()=>{const x=S.d.tasks.find(t=>t.id===b.dataset.task);x.done=!x.done;render();if(x.done)toast('済みにしました');apiPost({api:'taskDone',id:x.id,done:x.done}).catch(()=>{});LS.set('gran_me',JSON.stringify(S.d))});
   m.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{S.term=+b.dataset.t;S.editing=null;render();window.scrollTo(0,0)});
-  m.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{S.editing=+b.dataset.edit;render();const e=$('#ed');e&&e.focus()});
-  m.querySelectorAll('[data-cancel]').forEach(b=>b.onclick=()=>{S.editing=null;render()});
-  m.querySelectorAll('[data-save]').forEach(b=>b.onclick=()=>busy(b,'保存しています…',async()=>{
-    const t=S.d.terms[S.term],f=t.fields[+b.dataset.save],v=$('#ed').value.trim();
-    const r=await apiPost({api:'saveTerm',term:t.name,sec:f.sec,item:f.item,value:v});
-    if(r.ok){f.value=v;S.editing=null;LS.set('gran_me',JSON.stringify(S.d));render();toast('保存しました。構築シートにも入りました')}else toast(r.msg||'保存できませんでした')}));
+  m.querySelectorAll('textarea.tf').forEach(x=>{grow(x);x.addEventListener('input',()=>{grow(x);updateBar()})});
+  const sa=$('#tsaveall');if(sa)sa.onclick=()=>busy(sa,'保存しています…',async()=>{
+    const t=S.d.terms[S.term],changed=[];
+    document.querySelectorAll('textarea.tf').forEach(x=>{const f=t.fields[+x.dataset.i],v=x.value.trim();if(v!==(f.value||'').trim())changed.push({sec:f.sec,item:f.item,value:v,f})});
+    if(!changed.length)return;
+    const r=await apiPost({api:'saveTerm',term:t.name,fields:changed.map(c=>({sec:c.sec,item:c.item,value:c.value}))});
+    if(r.ok){changed.forEach(c=>c.f.value=c.value);LS.set('gran_me',JSON.stringify(S.d));updateBar();toast(changed.length+'項目を保存しました。構築シートにも入りました')}else toast(r.msg||'保存できませんでした')});
   m.querySelectorAll('[data-rt]').forEach(b=>b.onclick=()=>{S.recTab=b.dataset.rt;render()});
   const ks=$('#ksend');if(ks)ks.onclick=()=>busy(ks,'送っています…',async()=>{
     const w=$('#kw').value.trim(),q=$('#kq').value.trim(),s=$('#ks').value.trim();if(!w&&!q){toast('「解決したいこと」か「質問の内容」を書いてください');return}
@@ -302,6 +310,7 @@ function bind(){
 function bindDraft(){const c=$('#dcopy');if(c)c.onclick=()=>{const t=$('#dtext').innerText;navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>toast('コピーしました'),()=>toast('コピーできませんでした'))}}
 
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+window.addEventListener('beforeunload',e=>{if(dirtyCount()){e.preventDefault();e.returnValue=''}});
 render();if(TOKEN)load();
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&TOKEN&&S.d&&!S.loading)load()});
 </script>
