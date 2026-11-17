@@ -82,6 +82,8 @@ button{font:inherit;cursor:pointer}
 .term .go{color:var(--red);font-weight:700;font-size:12.5px}
 @media (prefers-reduced-motion:reduce){.term{transition:none}.term:hover{transform:none}}
 .savebar{position:sticky;bottom:calc(12px + env(safe-area-inset-bottom,0px));margin-top:14px;background:var(--bar);color:#fff;border-radius:12px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13.5px;z-index:3}
+.field select.tf,.field input.tf{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);margin-top:6px}
+.consent{border-color:var(--red);background:#fff7f7;margin-bottom:14px}.consent ol{margin:0 0 10px;padding-left:1.4em;font-size:13.5px}.ck{display:block;font-weight:700;background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer}.ck input{width:18px;height:18px;vertical-align:-3px;margin-right:6px}
 .field textarea.tf{min-height:44px;resize:vertical;margin-top:6px;overflow:hidden}
 .sec{font-size:12px;font-weight:700;color:var(--red);letter-spacing:.06em;margin:16px 0 0}
 .field{padding:12px 0;border-top:1px solid var(--line)}
@@ -203,18 +205,37 @@ function build(){
   return `<div class="top"><div><h1>本部づくり</h1><p class="muted" style="margin:4px 0 0">10のテーマごとに、今の答えを見て、その場で書き足せます。書いた答えは構築シートに入ります。</p></div></div>
   <div class="terms">${d.terms.map((t,i)=>`<button class="term" data-t="${i}"><span class="no">${String(i+1).padStart(2,'0')}</span><b>${esc(t.name)}</b><small>${esc(t.desc)}</small><span class="foot2"><span>${t.fields.length}項目</span><span class="go">開いて書く →</span></span></button>`).join('')}</div>`;
 }
+function fieldKey(f){return (f.sec?f.sec+':':'')+f.item}
 function termView(t){
+  const isContract=S.d.contract&&t.name===S.d.contract.term;
   let sec='',h='';
   t.fields.forEach((f,i)=>{
+    if(f.type==='hidden')return;
     if(f.sec!==sec){sec=f.sec;if(sec)h+=`<p class="sec">${esc(sec)}</p>`}
-    h+=`<div class="field"><label class="label" for="tf${i}"><b>${esc(f.item)}</b></label><textarea class="tf" id="tf${i}" data-i="${i}" rows="1" placeholder="ここに書きます">${esc(f.value)}</textarea></div>`;
+    const cond=f.cond?` data-cond="${esc(JSON.stringify(f.cond))}"`:'';
+    let input;
+    if(f.type==='sel'){const opts=(f.opts||[]).slice();if(f.value&&opts.indexOf(f.value)<0)opts.unshift(f.value);
+      input=`<select class="tf" id="tf${i}" data-i="${i}" data-key="${esc(fieldKey(f))}"><option value="">選んでください</option>${opts.map(o=>`<option${o===f.value?' selected':''}>${esc(o)}</option>`).join('')}</select>`}
+    else if(f.type==='ta'){input=`<textarea class="tf" id="tf${i}" data-i="${i}" data-key="${esc(fieldKey(f))}" rows="2" placeholder="${esc(f.hint||'ここに書きます')}">${esc(f.value)}</textarea>`}
+    else{input=`<input type="text" class="tf" id="tf${i}" data-i="${i}" data-key="${esc(fieldKey(f))}" placeholder="${esc(f.hint||'ここに書きます')}" value="${esc(f.value)}">`}
+    h+=`<div class="field"${cond}><label class="label" for="tf${i}"><b>${esc(f.item)}</b></label>${input}</div>`;
   });
+  let top='',bottom='';
+  if(isContract){
+    const c=S.d.contract,cf=t.fields.find(f=>fieldKey(f)===c.key),ok=cf&&/^確認済み/.test(cf.value||'');
+    top=`<div class="card consent"><h2>ご利用前の確認</h2><ol>${c.lines.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>${ok?`<p class="muted" style="margin:0">${esc(cf.value)}</p>`:`<label class="ck"><input type="checkbox" id="consentck"> ${esc(c.check)}</label><p class="muted" style="margin:6px 0 0">チェックを入れて「まとめて保存する」を押すと、確認したことが記入者と日時つきで記録されます。</p>`}</div>`;
+    bottom=`<div class="card" style="margin-top:14px"><h2>契約書の素案</h2><p class="muted" style="margin:0 0 10px">保存した答えから、弁護士に見せる前の素案（Googleドキュメント）を作ります。押すたびに新しいファイルができ、前のものは消えません。必ず御社の弁護士に見てもらってください。</p><button class="btn dark" id="cbuild">▶ 契約書の素案を作る</button><div id="cdone" style="margin-top:10px"></div></div>`;
+  }
   return `<button class="back" data-go="build">← 本部づくりへ</button><div class="top"><div><h1>${esc(t.name)}</h1><p class="muted" style="margin:4px 0 0">${esc(t.desc)}</p></div></div>
-  <div class="card">${h||'<p class="muted">項目がまだありません。</p>'}</div>
+  ${top}<div class="card"${isContract&&!/^確認済み/.test(((t.fields.find(f=>fieldKey(f)===S.d.contract.key)||{}).value)||'')?' id="gated" hidden':''}>${h||'<p class="muted">項目がまだありません。</p>'}</div>${bottom}
   <div class="savebar" id="savebar" hidden><span id="dirtyn"></span><button class="btn" id="tsaveall">まとめて保存する</button></div>`;
 }
+function applyCond(){
+  const val={};document.querySelectorAll('.tf').forEach(x=>val[x.dataset.key]=x.value);
+  document.querySelectorAll('.field[data-cond]').forEach(el=>{const [k,vs]=JSON.parse(el.dataset.cond);el.hidden=!(vs||[]).includes(val[k]||'')});
+}
 function grow(el){el.style.height='auto';el.style.height=(el.scrollHeight+2)+'px'}
-function dirtyCount(){if(S.term===null)return 0;const t=S.d.terms[S.term];let n=0;document.querySelectorAll('textarea.tf').forEach(x=>{if(x.value.trim()!==(t.fields[+x.dataset.i].value||'').trim())n++});return n}
+function dirtyCount(){if(S.term===null||!S.d||!S.d.terms)return 0;const t=S.d.terms[S.term];let n=0;document.querySelectorAll('.tf').forEach(x=>{if(x.value.trim()!==(t.fields[+x.dataset.i].value||'').trim())n++});const ck=$('#consentck');if(ck&&ck.checked)n++;return n}
 function updateBar(){const n=dirtyCount(),b=$('#savebar');if(!b)return;b.hidden=!n;$('#dirtyn').textContent=n+'項目を書き換えました（まだ保存していません）'}
 function leaveOk(){return !dirtyCount()||confirm('保存していない書き換えがあります。保存せずに移りますか？')}
 
@@ -288,13 +309,19 @@ function bind(){
   m.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{if(b.dataset.rec)S.recTab=b.dataset.rec;go(b.dataset.go)});
   m.querySelectorAll('[data-task]').forEach(b=>b.onclick=async()=>{const x=S.d.tasks.find(t=>t.id===b.dataset.task);x.done=!x.done;render();if(x.done)toast('済みにしました');apiPost({api:'taskDone',id:x.id,done:x.done}).catch(()=>{});LS.set('gran_me',JSON.stringify(S.d))});
   m.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{S.term=+b.dataset.t;S.editing=null;render();window.scrollTo(0,0)});
-  m.querySelectorAll('textarea.tf').forEach(x=>{grow(x);x.addEventListener('input',()=>{grow(x);updateBar()})});
+  m.querySelectorAll('.tf').forEach(x=>{if(x.tagName==='TEXTAREA')grow(x);x.addEventListener('input',()=>{if(x.tagName==='TEXTAREA')grow(x);updateBar();applyCond()});x.addEventListener('change',()=>{updateBar();applyCond()})});
+  applyCond();
+  const ck=$('#consentck');if(ck)ck.onchange=()=>{const g=$('#gated');if(g)g.hidden=!ck.checked;updateBar()};
+  const cb=$('#cbuild');if(cb)cb.onclick=()=>{if(dirtyCount()){toast('先に「まとめて保存する」を押してください');return}busy(cb,'素案を作っています…（30秒ほど）',async()=>{
+    const r=await apiPost({api:'contract'});
+    $('#cdone').innerHTML=r.ok?`<p>素案ができました：<a href="${esc(r.url)}" target="_blank" rel="noopener" style="color:var(--red)">${esc(r.name)}</a></p><p class="muted">決まっていない所 ${r.unresolved}件・弁護士に確認してほしい点 ${r.checks}件</p>`:`<p style="color:var(--red)">${esc(r.msg||'素案を作れませんでした')}</p>`})};
   const sa=$('#tsaveall');if(sa)sa.onclick=()=>busy(sa,'保存しています…',async()=>{
     const t=S.d.terms[S.term],changed=[];
-    document.querySelectorAll('textarea.tf').forEach(x=>{const f=t.fields[+x.dataset.i],v=x.value.trim();if(v!==(f.value||'').trim())changed.push({sec:f.sec,item:f.item,value:v,f})});
+    document.querySelectorAll('.tf').forEach(x=>{const f=t.fields[+x.dataset.i],v=x.value.trim();if(v!==(f.value||'').trim())changed.push({sec:f.sec,item:f.item,value:v,f})});
+    const ck=$('#consentck');if(ck&&ck.checked){const cf=t.fields.find(f=>fieldKey(f)===S.d.contract.key);if(cf)changed.push({sec:cf.sec,item:cf.item,value:'確認済み',f:cf})}
     if(!changed.length)return;
     const r=await apiPost({api:'saveTerm',term:t.name,fields:changed.map(c=>({sec:c.sec,item:c.item,value:c.value}))});
-    if(r.ok){changed.forEach(c=>c.f.value=c.value);LS.set('gran_me',JSON.stringify(S.d));updateBar();toast(changed.length+'項目を保存しました。構築シートにも入りました')}else toast(r.msg||'保存できませんでした')});
+    if(r.ok){changed.forEach(c=>c.f.value=c.value);LS.set('gran_me',JSON.stringify(S.d));if(ck&&ck.checked){render();load()}else updateBar();toast(changed.length+'項目を保存しました。構築シートにも入りました')}else toast(r.msg||'保存できませんでした')});
   m.querySelectorAll('[data-rt]').forEach(b=>b.onclick=()=>{S.recTab=b.dataset.rt;render()});
   const ks=$('#ksend');if(ks)ks.onclick=()=>busy(ks,'送っています…',async()=>{
     const w=$('#kw').value.trim(),q=$('#kq').value.trim(),s=$('#ks').value.trim();if(!w&&!q){toast('「解決したいこと」か「質問の内容」を書いてください');return}
