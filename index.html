@@ -81,6 +81,12 @@ button{font:inherit;cursor:pointer}
 .term .foot2{grid-column:1/3;display:flex;justify-content:space-between;align-items:center;border-top:1px dashed var(--line);padding-top:10px;margin-top:6px;font-size:12px;color:var(--sub)}
 .term .go{color:var(--red);font-weight:700;font-size:12.5px}
 @media (prefers-reduced-motion:reduce){.term{transition:none}.term:hover{transform:none}}
+.term .tag{position:absolute;top:14px;right:14px;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;border:1px solid var(--line);color:var(--sub);background:#fff}
+.term .tag.w{border-color:var(--red);color:#fff;background:var(--red)}
+.term b{padding-right:44px}
+.term:not(.w) .go{color:var(--ink)}
+.val{margin:4px 0 0;white-space:pre-wrap;line-height:1.7}
+.card.note{border-left:4px solid var(--ink)}
 .savebar{position:sticky;bottom:calc(12px + env(safe-area-inset-bottom,0px));margin-top:14px;background:var(--bar);color:#fff;border-radius:12px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13.5px;z-index:3}
 .field select.tf,.field input.tf{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);margin-top:6px}
 .consent{border-color:var(--red);background:#fff7f7;margin-bottom:14px}.consent ol{margin:0 0 10px;padding-left:1.4em;font-size:13.5px}.ck{display:block;font-weight:700;background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer}.ck input{width:18px;height:18px;vertical-align:-3px;margin-right:6px}
@@ -202,11 +208,26 @@ function home(){
 function build(){
   const d=S.d;
   if(S.term!==null) return termView(d.terms[S.term]);
-  return `<div class="top"><div><h1>本部づくり</h1><p class="muted" style="margin:4px 0 0">10のテーマごとに、今の答えを見て、その場で書き足せます。書いた答えは構築シートに入ります。</p></div></div>
-  <div class="terms">${d.terms.map((t,i)=>`<button class="term" data-t="${i}"><span class="no">${String(i+1).padStart(2,'0')}</span><b>${esc(t.name)}</b><small>${esc(t.desc)}</small><span class="foot2"><span>${t.fields.length}項目</span><span class="go">開いて書く →</span></span></button>`).join('')}</div>`;
+  return `<div class="top"><div><h1>本部づくり</h1><p class="muted" style="margin:4px 0 0">「書く」のテーマは、御社がここで答えます。答えは構築シートに入ります。「見る」のテーマは、コンサルで決まったことをGRANが書き込みます。</p></div></div>
+  <div class="terms">${d.terms.map((t,i)=>{const filled=t.fields.filter(f=>f.type!=='hidden'&&String(f.value||'').trim()).length,all=t.fields.filter(f=>f.type!=='hidden').length;
+    return `<button class="term${t.write?' w':''}" data-t="${i}"><span class="no">${String(i+1).padStart(2,'0')}</span><span class="tag${t.write?' w':''}">${t.write?'書く':'見る'}</span><b>${esc(t.name)}</b><small>${esc(t.desc)}</small><span class="foot2"><span>${t.write?all+'項目':'決まった項目 '+filled+' / '+all}</span><span class="go">${t.write?'開いて書く →':'開いて見る →'}</span></span></button>`}).join('')}</div>`;
 }
 function fieldKey(f){return (f.sec?f.sec+':':'')+f.item}
+function readView(t){
+  let sec='',h='';const rest=[];
+  t.fields.forEach(f=>{
+    if(f.type==='hidden')return;
+    if(!String(f.value||'').trim()){rest.push(f.item);return}
+    if(f.sec!==sec){sec=f.sec;if(sec)h+=`<p class="sec">${esc(sec)}</p>`}
+    h+=`<div class="field"><p class="label"><b>${esc(f.item)}</b></p><p class="val">${esc(f.value)}</p></div>`;
+  });
+  return `<button class="back" data-go="build">← 本部づくりへ</button><div class="top"><div><h1>${esc(t.name)}</h1><p class="muted" style="margin:4px 0 0">${esc(t.desc)}</p></div></div>
+  <div class="card note"><p style="margin:0">このテーマは、コンサルで決まったことをGRANが書き込みます。書き足したいことや、違っているところがあれば、「壁打ちの質問」から送ってください。</p><div class="btns" style="margin-top:10px"><button class="btn small" data-go="rec" data-rec="壁打ちの質問">壁打ちの質問を送る</button></div></div>
+  <div class="card" style="margin-top:14px">${h||'<p class="muted">決まった項目はまだありません。コンサルで決まると、ここに出ます。</p>'}</div>
+  ${rest.length?`<div class="card" style="margin-top:14px"><h2>これから決める項目（${rest.length}）</h2><p class="muted" style="margin:0">${rest.map(esc).join('／')}</p></div>`:''}`;
+}
 function termView(t){
+  if(!t.write) return readView(t);
   const isContract=S.d.contract&&t.name===S.d.contract.term;
   let sec='',h='';
   t.fields.forEach((f,i)=>{
@@ -223,7 +244,7 @@ function termView(t){
   let top='',bottom='';
   if(isContract){
     const c=S.d.contract,cf=t.fields.find(f=>fieldKey(f)===c.key),ok=cf&&/^確認済み/.test(cf.value||'');
-    top=`<div class="card consent"><h2>ご利用前の確認</h2><ol>${c.lines.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>${ok?`<p class="muted" style="margin:0">${esc(cf.value)}</p>`:`<label class="ck"><input type="checkbox" id="consentck"> ${esc(c.check)}</label><p class="muted" style="margin:6px 0 0">チェックを入れて「まとめて保存する」を押すと、確認したことが記入者と日時つきで記録されます。</p>`}</div>`;
+    top=`${c.audio?`<p style="margin:0 0 12px"><a class="btn ghost small" href="${esc(c.audio)}" target="_blank" rel="noopener">▶ 加盟契約の条件の使い方の音声を聞く</a></p>`:''}<div class="card consent"><h2>ご利用前の確認</h2><ol>${c.lines.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>${ok?`<p class="muted" style="margin:0">${esc(cf.value)}</p>`:`<label class="ck"><input type="checkbox" id="consentck"> ${esc(c.check)}</label><p class="muted" style="margin:6px 0 0">チェックを入れて「まとめて保存する」を押すと、確認したことが記入者と日時つきで記録されます。</p>`}</div>`;
     bottom=`<div class="card" style="margin-top:14px"><h2>契約書の素案</h2><p class="muted" style="margin:0 0 10px">保存した答えから、弁護士に見せる前の素案（Googleドキュメント）を作ります。押すたびに新しいファイルができ、前のものは消えません。必ず御社の弁護士に見てもらってください。</p><button class="btn dark" id="cbuild">▶ 契約書の素案を作る</button><div id="cdone" style="margin-top:10px"></div></div>`;
   }
   return `<button class="back" data-go="build">← 本部づくりへ</button><div class="top"><div><h1>${esc(t.name)}</h1><p class="muted" style="margin:4px 0 0">${esc(t.desc)}</p></div></div>
